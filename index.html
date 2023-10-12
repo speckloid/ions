@@ -6,3 +6,65 @@
 <body>
 <canvas id="ionCanvas" width="400" height="400" style="border:1px solid #000;"></canvas>
 <button onclick="startSimulation()">Start Simulation</button>
+
+<script>
+const canvas = document.getElementById('ionCanvas');
+const ctx = canvas.getContext('2d');
+const ions = []; // An array to store ion objects
+
+const canvasWidth = canvas.width;
+const canvasHeight = canvas.height;
+
+// Function to create an ion object
+function createIon(x, y, charge, mass) {
+    return {
+        x,
+        y,
+        charge,
+        mass,
+        radius: 20, // Adjust as needed
+        velocityX: 0,
+        velocityY: 0,
+        accelerationX: 0,
+        accelerationY: 0,
+    };
+}
+
+// Function to draw ions
+function drawIons() {
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    ions.forEach(ion => {
+        ctx.fillStyle = ion.charge > 0 ? 'red' : 'blue';
+        ctx.beginPath();
+        ctx.arc(ion.x, ion.y, ion.radius, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+// Function to start the physics simulation
+function startSimulation() {
+    // Add ions to the array with zero initial velocity
+    ions.push(createIon(100, 100, 1, 1)); // Example: Positive ion with charge 1
+    ions.push(createIon(200, 200, -1, 1)); // Example: Negative ion with charge -1
+
+    // Set ions in motion
+    ions.forEach(ion => {
+        ion.velocityX = Math.random() * 2 - 1; // Random initial velocities for demonstration
+        ion.velocityY = Math.random() * 2 - 1;
+    });
+
+    // Start the animation loop
+    requestAnimationFrame(update);
+}
+
+// Animation loop function
+function update() {
+    drawIons();
+    // Update ion positions and interactions here
+    requestAnimationFrame(update);
+}
+
+</script>
+</body>
+</html>
