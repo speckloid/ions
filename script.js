@@ -66,8 +66,10 @@ function updateIons() {
             });
             ion.velocityX += ion.accelerationX;
             ion.velocityY += ion.accelerationY;
-            ion.x += ion.velocityX;
-            ion.y += ion.velocityY;
+
+            // Ensure the ion stays within the canvas boundaries
+            ion.x = Math.max(ion.radius, Math.min(canvasWidth - ion.radius, ion.x + ion.velocityX));
+            ion.y = Math.max(ion.radius, Math.min(canvasHeight - ion.radius, ion.y + ion.velocityY));
         }
 
         // Reflect ions off the canvas edges if they go out of bounds
@@ -134,4 +136,19 @@ canvas.addEventListener('mousedown', function (e) {
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance <= ion.radius) {
-            selectedIon = ion
+            selectedIon = ion;
+            isDragging = true;
+            break; // We selected an ion, so we can exit the loop
+        }
+    }
+    mouseReleased = false;
+});
+
+// Function to handle mousemove event
+canvas.addEventListener('mousemove', function (e) {
+    if (isDragging && selectedIon) {
+        const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+        const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+
+        // Ensure the ion stays within the canvas boundaries
+        selectedIon.x = Math.max(selectedIon.radius, Math
