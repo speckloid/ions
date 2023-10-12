@@ -9,15 +9,15 @@ const canvasWidth = canvas.width;
 const canvasHeight = canvas.height;
 
 // Function to create an ion object
-function createIon(x, y, charge, mass, velocityX, velocityY) {
+function createIon(x, y, charge, mass) {
     return {
         x,
         y,
         charge,
         mass,
         radius: 20, // Adjust as needed
-        velocityX: velocityX || 0, // Initial velocity in the x direction
-        velocityY: velocityY || 0, // Initial velocity in the y direction
+        velocityX: 0, // Initial velocity in the x direction
+        velocityY: 0, // Initial velocity in the y direction
     };
 }
 
@@ -91,8 +91,14 @@ function updateIons() {
 }
 
 // Add ions to the array
-ions.push(createIon(100, 100, 1, 1, 2, 2)); // Example: Positive ion with mass 1 and initial velocity
-ions.push(createIon(200, 200, -1, 1, -2, -2)); // Example: Negative ion with mass 1 and initial velocity
+ions.push(createIon(100, 100, 1, 1)); // Example: Positive ion with mass 1
+ions.push(createIon(200, 200, -1, 1)); // Example: Negative ion with mass 1
+
+// Initialize ion velocities (e.g., 2 pixels per frame in x direction)
+ions.forEach(ion => {
+    ion.velocityX = 2;
+    ion.velocityY = 2;
+});
 
 function update() {
     updateIons(); // Update ion positions based on velocity
