@@ -50,7 +50,8 @@ function drawIons() {
 function getUserInput() {
     for (let i = 0; i < 4; i++) {
         const charge = parseInt(prompt(`Enter charge for ion ${i + 1} (positive or negative):`));
-        const radius = parseInt(prompt(`Enter radius for ion ${i + 1):`));
+        const radius = parseInt(prompt(`Enter radius for ion ${i + 1}:`));
+
         ions.push(createIon(Math.random() * canvasWidth, Math.random() * canvasHeight, charge, 1, radius));
     }
 }
