@@ -19,6 +19,8 @@ function createIon(x, y, charge, mass) {
         radius: 20, // Adjust as needed
         velocityX: 0, // Initial velocity in the x direction
         velocityY: 0, // Initial velocity in the y direction
+        accelerationX: 0, // Initial acceleration in the x direction
+        accelerationY: 0, // Initial acceleration in the y direction
     };
 }
 
@@ -34,10 +36,36 @@ function drawIons() {
     });
 }
 
-// Function to update ion positions based on their velocity
+// Function to calculate the Coulomb's law force between two ions
+function calculateCoulombsLawForce(ion1, ion2) {
+    const dx = ion2.x - ion1.x;
+    const dy = ion2.y - ion1.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const k = 9e9; // Coulomb's law constant, you can adjust this value
+    const force = (k * ion1.charge * ion2.charge) / (distance * distance);
+    const angle = Math.atan2(dy, dx);
+    const forceX = force * Math.cos(angle);
+    const forceY = force * Math.sin(angle);
+
+    return { forceX, forceY };
+}
+
+// Function to update ion positions and handle Coulomb's law interactions
 function updateIons() {
     ions.forEach(ion => {
+        ion.accelerationX = 0;
+        ion.accelerationY = 0;
+
         if (!isDragging && mouseReleased) {
+            ions.forEach(otherIon => {
+                if (ion !== otherIon) {
+                    const { forceX, forceY } = calculateCoulombsLawForce(ion, otherIon);
+                    ion.accelerationX += forceX / ion.mass;
+                    ion.accelerationY += forceY / ion.mass;
+                }
+            });
+            ion.velocityX += ion.accelerationX;
+            ion.velocityY += ion.accelerationY;
             ion.x += ion.velocityX;
             ion.y += ion.velocityY;
         }
@@ -106,40 +134,4 @@ canvas.addEventListener('mousedown', function (e) {
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance <= ion.radius) {
-            selectedIon = ion;
-            isDragging = true;
-            break; // We selected an ion, so we can exit the loop
-        }
-    }
-    mouseReleased = false;
-});
-
-// Function to handle mousemove event
-canvas.addEventListener('mousemove', function (e) {
-    if (isDragging && selectedIon) {
-        const mouseX = e.clientX - canvas.getBoundingClientRect().left;
-        const mouseY = e.clientY - canvas.getBoundingClientRect().top;
-
-        // Ensure the ion stays within the canvas boundaries
-        selectedIon.x = Math.max(selectedIon.radius, Math.min(canvasWidth - selectedIon.radius, mouseX));
-        selectedIon.y = Math.max(selectedIon.radius, Math.min(canvasHeight - selectedIon.radius, mouseY));
-    }
-});
-
-// Function to handle mouseup event
-canvas.addEventListener('mouseup', function () {
-    isDragging = false;
-    selectedIon = null;
-    mouseReleased = true;
-});
-
-// Add ions to the array with zero initial velocity
-ions.push(createIon(100, 100, 1, 1)); // Example: Positive ion with mass 1
-ions.push(createIon(200, 200, -1, 1)); // Example: Negative ion with mass 1
-
-function update() {
-    updateIons(); // Update ion positions, handle collisions, and mouse interaction
-    requestAnimationFrame(update);
-}
-
-update(); // Start the simulation loop
+            selectedIon = ion
