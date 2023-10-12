@@ -5,6 +5,9 @@ const ions = []; // An array to store ion objects
 let selectedIon = null; // Track the currently selected ion
 let isDragging = false; // Flag to check if the ion is being dragged
 
+const canvasWidth = canvas.width;
+const canvasHeight = canvas.height;
+
 // Function to create an ion object
 function createIon(x, y, charge) {
     return {
@@ -17,7 +20,7 @@ function createIon(x, y, charge) {
 
 // Function to draw ions
 function drawIons() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
     ions.forEach(ion => {
         ctx.fillStyle = ion.charge > 0 ? 'red' : 'blue';
@@ -52,8 +55,10 @@ canvas.addEventListener('mousemove', function (e) {
     if (isDragging && selectedIon) {
         const mouseX = e.clientX - canvas.getBoundingClientRect().left;
         const mouseY = e.clientY - canvas.getBoundingClientRect().top;
-        selectedIon.x = mouseX;
-        selectedIon.y = mouseY;
+
+        // Ensure the ion stays within the canvas boundaries
+        selectedIon.x = Math.max(selectedIon.radius, Math.min(canvasWidth - selectedIon.radius, mouseX));
+        selectedIon.y = Math.max(selectedIon.radius, Math.min(canvasHeight - selectedIon.radius, mouseY));
         drawIons(); // Redraw ions to update the position
     }
 });
@@ -69,7 +74,7 @@ ions.push(createIon(100, 100, 1)); // Example: Positive ion
 ions.push(createIon(200, 200, -1)); // Example: Negative ion
 
 function update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     drawIons(); // Draw ions in their updated positions
     requestAnimationFrame(update);
 }
