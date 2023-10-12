@@ -4,6 +4,7 @@ const ions = []; // An array to store ion objects
 
 let selectedIon = null; // Track the currently selected ion
 let isDragging = false; // Flag to check if the ion is being dragged
+let mouseReleased = true; // Flag to check if the mouse button is released
 
 const canvasWidth = canvas.width;
 const canvasHeight = canvas.height;
@@ -51,6 +52,7 @@ canvas.addEventListener('mousedown', function (e) {
             break; // We selected an ion, so we can exit the loop
         }
     }
+    mouseReleased = false;
 });
 
 // Function to handle mousemove event
@@ -70,12 +72,13 @@ canvas.addEventListener('mousemove', function (e) {
 canvas.addEventListener('mouseup', function () {
     isDragging = false;
     selectedIon = null;
+    mouseReleased = true;
 });
 
 // Function to update ion positions based on their velocity
 function updateIons() {
     ions.forEach(ion => {
-        if (!isDragging) {
+        if (!isDragging && mouseReleased) {
             ion.x += ion.velocityX;
             ion.y += ion.velocityY;
         }
@@ -88,17 +91,28 @@ function updateIons() {
             ion.velocityY *= -1; // Reverse the y velocity
         }
     });
-}
 
-// Add ions to the array with zero initial velocity
-ions.push(createIon(100, 100, 1, 1)); // Example: Positive ion with mass 1
-ions.push(createIon(200, 200, -1, 1)); // Example: Negative ion with mass 1
+    // Handle ion-ion collisions
+    ions.forEach(ion => {
+        ions.forEach(otherIon => {
+            if (ion !== otherIon) {
+                const dx = otherIon.x - ion.x;
+                const dy = otherIon.y - ion.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const totalRadius = ion.radius + otherIon.radius;
 
-function update() {
-    updateIons(); // Update ion positions based on velocity
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    drawIons(); // Draw ions in their updated positions
-    requestAnimationFrame(update);
-}
+                if (distance < totalRadius) {
+                    // Elastic collision
+                    const angle = Math.atan2(dy, dx);
 
-update(); // Start the simulation loop
+                    // Calculate relative velocity
+                    const relativeVelocityX = ion.velocityX - otherIon.velocityX;
+                    const relativeVelocityY = ion.velocityY - otherIon.velocityY;
+
+                    // Calculate dot product of relative velocity and normal vector
+                    const dotProduct = (relativeVelocityX * dx + relativeVelocityY * dy) / distance;
+
+                    // Update velocities
+                    ion.velocityX -= (2 * otherIon.mass / (ion.mass + otherIon.mass)) * dotProduct * Math.cos(angle);
+                    ion.velocityY -= (2 * otherIon.mass / (ion.mass + otherIon.mass)) * dotProduct * Math.sin(angle);
+                    otherIon.velocityX += (2 * ion.mass /
