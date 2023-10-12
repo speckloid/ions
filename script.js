@@ -30,14 +30,12 @@ function drawIons() {
     });
 }
 
-// Function to update ion positions based on their velocity
+// Function to update ion positions and handle collisions
 function updateIons() {
     ions.forEach(ion => {
-        // Update positions
         ion.x += ion.velocityX;
         ion.y += ion.velocityY;
 
-        // Check for collisions with other ions
         ions.forEach(otherIon => {
             if (ion !== otherIon) {
                 const dx = otherIon.x - ion.x;
@@ -48,29 +46,28 @@ function updateIons() {
                 if (distance < totalRadius) {
                     // Elastic collision
                     const angle = Math.atan2(dy, dx);
+
+                    // Calculate relative velocity
+                    const relativeVelocityX = ion.velocityX - otherIon.velocityX;
+                    const relativeVelocityY = ion.velocityY - otherIon.velocityY;
+
+                    // Calculate dot product of relative velocity and normal vector
+                    const dotProduct = (relativeVelocityX * dx + relativeVelocityY * dy) / distance;
+
+                    // Update velocities
+                    ion.velocityX -= (2 * otherIon.mass / (ion.mass + otherIon.mass)) * dotProduct * Math.cos(angle);
+                    ion.velocityY -= (2 * otherIon.mass / (ion.mass + otherIon.mass)) * dotProduct * Math.sin(angle);
+                    otherIon.velocityX += (2 * ion.mass / (ion.mass + otherIon.mass)) * dotProduct * Math.cos(angle);
+                    otherIon.velocityY += (2 * ion.mass / (ion.mass + otherIon.mass)) * dotProduct * Math.sin(angle);
+
+                    // Move ions so they don't overlap
                     const overlap = totalRadius - distance;
                     const moveX = (overlap / 2) * Math.cos(angle);
                     const moveY = (overlap / 2) * Math.sin(angle);
-
                     ion.x -= moveX;
                     ion.y -= moveY;
                     otherIon.x += moveX;
                     otherIon.y += moveY;
-
-                    // Update velocities
-                    const relativeVelocityX = ion.velocityX - otherIon.velocityX;
-                    const relativeVelocityY = ion.velocityY - otherIon.velocityY;
-                    const collisionAngle = Math.atan2(dy, dx);
-                    const speed = Math.sqrt(relativeVelocityX ** 2 + relativeVelocityY ** 2);
-                    const direction = Math.atan2(relativeVelocityY, relativeVelocityX);
-
-                    const newVelocity1 = speed * Math.cos(direction - collisionAngle);
-                    const newVelocity2 = speed * Math.sin(direction - collisionAngle);
-
-                    ion.velocityX = newVelocity1 + otherIon.velocityX;
-                    ion.velocityY = newVelocity2 + otherIon.velocityY;
-                    otherIon.velocityX = newVelocity1 + ion.velocityX;
-                    otherIon.velocityY = newVelocity2 + ion.velocityY;
                 }
             }
         });
@@ -90,7 +87,7 @@ ions.push(createIon(100, 100, 1, 1, 2, 2)); // Example: Positive ion with mass 1
 ions.push(createIon(200, 200, -1, 1, -2, -2)); // Example: Negative ion with mass 1 and initial velocity
 
 function update() {
-    updateIons(); // Update ion positions based on velocity
+    updateIons(); // Update ion positions and handle collisions
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     drawIons(); // Draw ions in their updated positions
     requestAnimationFrame(update);
