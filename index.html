@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ion Simulation 1910</title>
+    <title>Ion Simulation</title>
 </head>
 <body>
 <canvas id="ionCanvas" width="400" height="400" style="border:1px solid #000;"></canvas>
@@ -14,6 +14,9 @@ const ions = []; // An array to store ion objects
 
 const canvasWidth = canvas.width;
 const canvasHeight = canvas.height;
+
+let selectedIon = null; // Track the currently selected ion
+let isDragging = false; // Flag to check if the ion is being dragged
 
 // Function to create an ion object
 function createIon(x, y, charge, mass) {
@@ -42,6 +45,61 @@ function drawIons() {
     });
 }
 
+// Function to update ion positions and handle interactions
+function updateIons() {
+    ions.forEach(ion => {
+        ion.accelerationX = 0;
+        ion.accelerationY = 0;
+
+        // Handle Coulomb's law interactions and ion-ion collisions here
+        // Update ion velocities and positions
+
+        // Ensure the ion stays within the canvas boundaries
+        ion.x = Math.max(ion.radius, Math.min(canvasWidth - ion.radius, ion.x + ion.velocityX));
+        ion.y = Math.max(ion.radius, Math.min(canvasHeight - ion.radius, ion.y + ion.velocityY));
+    });
+
+    drawIons(); // Redraw ions after updating their positions
+}
+
+// Function to handle user interaction (e.g., click and drag)
+canvas.addEventListener('mousedown', function (e) {
+    const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+    const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+
+    // Check if the user clicked on an ion
+    for (let i = ions.length - 1; i >= 0; i--) {
+        const ion = ions[i];
+        const dx = ion.x - mouseX;
+        const dy = ion.y - mouseY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance <= ion.radius) {
+            selectedIon = ion;
+            isDragging = true;
+            break; // We selected an ion, so we can exit the loop
+        }
+    }
+});
+
+// Function to handle mousemove event
+canvas.addEventListener('mousemove', function (e) {
+    if (isDragging && selectedIon) {
+        const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+        const mouseY = e.clientY - canvas.getBoundingClientRect().top;
+
+        // Ensure the ion stays within the canvas boundaries
+        selectedIon.x = Math.max(selectedIon.radius, Math.min(canvasWidth - selectedIon.radius, mouseX));
+        selectedIon.y = Math.max(selectedIon.radius, Math.min(canvasHeight - selectedIon.radius, mouseY));
+    }
+});
+
+// Function to handle mouseup event
+canvas.addEventListener('mouseup', function () {
+    isDragging = false;
+    selectedIon = null;
+});
+
 // Function to start the physics simulation
 function startSimulation() {
     // Add ions to the array with zero initial velocity
@@ -60,8 +118,7 @@ function startSimulation() {
 
 // Animation loop function
 function update() {
-    drawIons();
-    // Update ion positions and interactions here
+    updateIons();
     requestAnimationFrame(update);
 }
 
