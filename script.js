@@ -9,12 +9,15 @@ const canvasWidth = canvas.width;
 const canvasHeight = canvas.height;
 
 // Function to create an ion object
-function createIon(x, y, charge) {
+function createIon(x, y, charge, mass) {
     return {
         x,
         y,
         charge,
+        mass,
         radius: 20, // Adjust as needed
+        velocityX: 0, // Initial velocity in the x direction
+        velocityY: 0, // Initial velocity in the y direction
     };
 }
 
@@ -69,14 +72,16 @@ canvas.addEventListener('mouseup', function () {
     selectedIon = null;
 });
 
-// Add ions to the array
-ions.push(createIon(100, 100, 1)); // Example: Positive ion
-ions.push(createIon(200, 200, -1)); // Example: Negative ion
+// Function to update ion positions based on their velocity
+function updateIons() {
+    ions.forEach(ion => {
+        if (!isDragging) {
+            ion.x += ion.velocityX;
+            ion.y += ion.velocityY;
+        }
 
-function update() {
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    drawIons(); // Draw ions in their updated positions
-    requestAnimationFrame(update);
-}
-
-update(); // Start the simulation loop
+        // Reflect ions off the canvas edges if they go out of bounds
+        if (ion.x - ion.radius < 0 || ion.x + ion.radius > canvasWidth) {
+            ion.velocityX *= -1; // Reverse the x velocity
+        }
+        if (ion.y - ion.radius < 0
