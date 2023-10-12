@@ -175,4 +175,21 @@ drawIons();
 function startSimulation() {
     // Set ions in motion
     ions.forEach(ion => {
-        ion.velocity
+        ion.velocityX = Math.random() * 2 - 1; // Random initial velocities for demonstration
+        ion.velocityY = Math.random() * 2 - 1;
+    });
+
+    // Start the animation loop
+    requestAnimationFrame(update);
+}
+
+// Animation loop function
+function update() {
+    updateIons();
+    requestAnimationFrame(update);
+}
+
+// Initial drawing
+drawIons();
+</script>
+
