@@ -1,9 +1,14 @@
+// script.js
 const canvas = document.getElementById('ionCanvas');
 const ctx = canvas.getContext('2d');
 const ions = []; // An array to store ion objects
 
 const canvasWidth = canvas.width;
 const canvasHeight = canvas.height;
+
+let selectedIon = null; // Track the currently selected ion
+let isDragging = false; // Flag to check if the ion is being dragged
+let mouseReleased = true; // Flag to check if the mouse button is released
 
 // Function to create an ion object
 function createIon(x, y, charge, mass) {
@@ -52,24 +57,23 @@ function updateIons() {
         ion.accelerationX = 0;
         ion.accelerationY = 0;
 
-        ions.forEach(otherIon => {
-            if (ion !== otherIon) {
-                const { forceX, forceY } = calculateCoulombsLawForce(ion, otherIon);
-                ion.accelerationX += forceX / ion.mass;
-                ion.accelerationY += forceY / ion.mass;
-            }
-        });
+        if (!isDragging && mouseReleased) {
+            ions.forEach(otherIon => {
+                if (ion !== otherIon) {
+                    const { forceX, forceY } = calculateCoulombsLawForce(ion, otherIon);
+                    ion.accelerationX += forceX / ion.mass;
+                    ion.accelerationY += forceY / ion.mass;
+                }
+            });
+            ion.velocityX += ion.accelerationX;
+            ion.velocityY += ion.accelerationY;
 
-        ion.velocityX += ion.accelerationX;
-        ion.velocityY += ion.accelerationY;
+            // Ensure the ion stays within the canvas boundaries
+            ion.x = Math.max(ion.radius, Math.min(canvasWidth - ion.radius, ion.x + ion.velocityX));
+            ion.y = Math.max(ion.radius, Math.min(canvasHeight - ion.radius, ion.y + ion.velocityY));
+        }
 
-        // Ensure the ion stays within the canvas boundaries
-        ion.x = Math.max(ion.radius, Math.min(canvasWidth - ion.radius, ion.x + ion.velocityX));
-        ion.y = Math.max(ion.radius, Math.min(canvasHeight - ion.radius, ion.y + ion.velocityY));
-    });
-
-    // Reflect ions off the canvas edges if they go out of bounds
-    ions.forEach(ion => {
+        // Reflect ions off the canvas edges if they go out of bounds
         if (ion.x - ion.radius < 0 || ion.x + ion.radius > canvasWidth) {
             ion.velocityX *= -1; // Reverse the x velocity
         }
@@ -90,10 +94,15 @@ function updateIons() {
                 if (distance < totalRadius) {
                     // Elastic collision
                     const angle = Math.atan2(dy, dx);
+
+                    // Calculate relative velocity
                     const relativeVelocityX = ion.velocityX - otherIon.velocityX;
                     const relativeVelocityY = ion.velocityY - otherIon.velocityY;
+
+                    // Calculate dot product of relative velocity and normal vector
                     const dotProduct = (relativeVelocityX * dx + relativeVelocityY * dy) / distance;
 
+                    // Update velocities
                     ion.velocityX -= (2 * otherIon.mass / (ion.mass + otherIon.mass)) * dotProduct * Math.cos(angle);
                     ion.velocityY -= (2 * otherIon.mass / (ion.mass + otherIon.mass)) * dotProduct * Math.sin(angle);
                     otherIon.velocityX += (2 * ion.mass / (ion.mass + otherIon.mass)) * dotProduct * Math.cos(angle);
@@ -133,6 +142,7 @@ canvas.addEventListener('mousedown', function (e) {
             break; // We selected an ion, so we can exit the loop
         }
     }
+    mouseReleased = false;
 });
 
 // Function to handle mousemove event
@@ -165,4 +175,4 @@ drawIons();
 function startSimulation() {
     // Set ions in motion
     ions.forEach(ion => {
-        ion.velocityX = Math.random() * 2 -
+        ion.velocity
