@@ -51,7 +51,7 @@ function calculateCoulombsLawForce(ion1, ion2) {
     const dx = ion2.x - ion1.x;
     const dy = ion2.y - ion1.y;
     const distance = Math.max(Math.sqrt(dx * dx + dy * dy), ion1.radius + ion2.radius); // Avoid division by zero
-    const k = 9e9; // Coulomb's law constant, you can adjust this value
+    const k = 9; // Coulomb's law constant, you can adjust this value
     const force = (k * ion1.charge * ion2.charge) / (distance * distance);
     const angle = Math.atan2(dy, dx);
     const forceX = force * Math.cos(angle);
